@@ -188,14 +188,12 @@ ignore_signals(int signame)
 {
 	signal(SIGTERM, SIG_IGN);
 	signal(SIGINT, SIG_IGN);
-	info("received interrupt");
 	signaled = 1;
 }
 
 void
 alarm_handler(int signame)
 {
-	info("ALARM!");
 	alarmed = 1;
 }
 
@@ -228,7 +226,6 @@ pid_t
 run_init()
 {
 	pid_t init_pid;
-	// char** env = get_env();
 	char *args[] = {"/opt/gonano/sbin/runsvdir", "-P", "/etc/service", 0};
 	// char *args[] = {"/bin/sleep", "3600", 0};
 
@@ -249,7 +246,6 @@ main(int argc, char *argv[])
 	int ret = 0;
 
 	log_level = LOG_LEVEL_INFO;
-	info("setting signal handlers");
 	struct sigaction alarm;
 	struct sigaction other;
 	alarm.sa_handler = alarm_handler;
@@ -262,22 +258,14 @@ main(int argc, char *argv[])
 	sigaction(SIGALRM, &alarm, NULL);
 	sigaction(SIGINT, &other, NULL);
 	sigaction(SIGTERM, &other, NULL);
-	// signal(SIGTERM, ignore_signals);
-	// signal(SIGINT, ignore_signals);
-	// signal(SIGALRM, alarm_handler);
 
-	info("importing envvars");
 	import_envvars(0, 0);
-	info("exporting envvars");
 	export_envvars(1);
 
-	info("running init");
 	init_pid = run_init();
 	if (init_pid > 0) {
 		while (child_pid != init_pid && signaled == 0) {
 			child_pid = waitpid(-1, &status, 0);
-			if (child_pid == -1 && errno == EINTR)
-				info("Wait interruped");
 		}
 	}
 
