@@ -238,10 +238,10 @@ kill_all_processes(int timeout)
 pid_t
 run_init()
 {
-	debug("starting service manager")
+	debug("starting service manager");
 	pid_t init_pid;
-	// char *args[] = {"/opt/gonano/sbin/runsvdir", "-P", "/etc/service", 0};
-	char *args[] = {"/bin/sleep", "10", 0};
+	char *args[] = {"/opt/gonano/sbin/runsvdir", "-P", "/etc/service", 0};
+	// char *args[] = {"/bin/sleep", "10", 0};
 
 	if ((init_pid = fork()) == 0) {
 		import_envvars(1, 1);
@@ -292,6 +292,8 @@ main(int argc, char *argv[])
 	if ((init_pid = run_init()) > 0) {
 		while (child_pid != init_pid && signaled == 0) {
 			child_pid = waitpid(-1, &status, 0);
+			if (child_pid > 0)
+				debug("reaped process %d", child_pid);
 		}
 	}
 
