@@ -1,3 +1,15 @@
+// -*- mode: c; tab-width: 4; indent-tabs-mode: 1; st-rulers: [80] -*-
+// vim: ts=8 sw=8 ft=c noet
+
+/*
+ * Copyright (c) 2015 Pagoda Box Inc.
+ * 
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/.
+ */
+ 
+
 #include <signal.h>
 #include <stdio.h>
 #include <errno.h>
@@ -44,7 +56,8 @@ void
 import_envvars(int clear_existing_environment, 
 	int override_existing_environment)
 {
-	debug("import_envvars(%d, %d)", clear_existing_environment, override_existing_environment);
+	debug("import_envvars(%d, %d)", clear_existing_environment,
+		override_existing_environment);
 	struct stat s;
 	env_list    *list = NULL;
 	char        env_dir[] = "/etc/container_environment/";
@@ -180,7 +193,8 @@ export_envvars(int to_dir)
 						fprintf(file, "%s", value);
 						fclose(file);
 					} else {
-						error("Failed to open file %s: %s", filename, strerror(errno));
+						error("Failed to open file %s: %s", filename, 
+							strerror(errno));
 					}
 				}
 				fprintf(shell_file, "export %s=%s\n", safe_key, safe_value);
