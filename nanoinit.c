@@ -22,8 +22,8 @@ int alarmed   = 0;
 void \
 NAME(const char *format, ...) \
 { \
-    va_list args; \
-    va_start(args, format); \
+	va_list args; \
+	va_start(args, format); \
 	if (log_level >= LOG_LEVEL) { \
 		char *real_format = malloc(strlen(format) + strlen(FORMAT_TITLE) + 4); \
 		memset(real_format, 0, strlen(format) + strlen(FORMAT_TITLE) + 4); \
