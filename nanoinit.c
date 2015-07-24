@@ -314,6 +314,6 @@ main(int argc, char *argv[])
 	if (signaled)
 		warn("Init system aborted.");
 
-	// kill_all_processes(KILL_ALL_PROCESSES_TIMEOUT);
+	kill_all_processes(KILL_ALL_PROCESSES_TIMEOUT);
 	return ret;
 }
