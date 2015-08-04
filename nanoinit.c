@@ -288,12 +288,15 @@ main(int argc, char *argv[])
 	int status = 0;
 	int ret = 0;
 	int arg_offset;
+	int killall = 1;
 
 	for (arg_offset = 1; arg_offset < argc; arg_offset++) {
 		if (strncmp("--",argv[arg_offset],2) != 0)
 			break;
 		if (strncmp("--quiet",argv[arg_offset],7) == 0)
-			log_level=LOG_LEVEL_WARN;
+			log_level = LOG_LEVEL_WARN;
+		if (strncmp("--no-killall",argv[arg_offset],12) == 0)
+			killall = 0;
 	}
 
 	struct sigaction alarm;
@@ -322,7 +325,7 @@ main(int argc, char *argv[])
 
 	if (signaled)
 		warn("Init system aborted.");
-
-	kill_all_processes(KILL_ALL_PROCESSES_TIMEOUT);
+	if (killall)
+		kill_all_processes(KILL_ALL_PROCESSES_TIMEOUT);
 	return ret;
 }
