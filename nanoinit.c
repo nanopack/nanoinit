@@ -292,6 +292,8 @@ main(int argc, char *argv[])
 	for (arg_offset = 1; arg_offset < argc; arg_offset++) {
 		if (strncmp("--",argv[arg_offset],2) != 0)
 			break;
+		if (strncmp("--quiet",argv[arg_offset],7) == 0)
+			log_level=LOG_LEVEL_WARN;
 	}
 
 	struct sigaction alarm;
