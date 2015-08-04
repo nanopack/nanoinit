@@ -250,11 +250,13 @@ kill_all_processes(int timeout)
 }
 
 pid_t
-run_init()
+run_init(char *args[])
 {
 	debug("starting service manager");
 	pid_t init_pid;
-	char *args[] = {"/opt/gonano/sbin/runsvdir", "-P", "/etc/service", 0};
+	char *default_args[] = {"/opt/gonano/sbin/runsvdir", "-P", "/etc/service", 0};
+	if (args == NULL)
+		args = default_args;
 	// char *args[] = {"/bin/sleep", "10", 0};
 
 	if ((init_pid = fork()) == 0) {
@@ -285,7 +287,12 @@ main(int argc, char *argv[])
 	pid_t child_pid = 0;
 	int status = 0;
 	int ret = 0;
+	int arg_offset;
 
+	for (arg_offset = 1; arg_offset < argc; arg_offset++) {
+		if (strncmp("--",argv[arg_offset],2) != 0)
+			break;
+	}
 
 	struct sigaction alarm;
 	struct sigaction other;
@@ -303,7 +310,7 @@ main(int argc, char *argv[])
 	import_envvars(0, 0);
 	export_envvars(1);
 
-	if ((init_pid = run_init()) > 0) {
+	if ((init_pid = run_init((arg_offset == argc) ? NULL : argv + arg_offset )) > 0) {
 		while (child_pid != init_pid && signaled == 0) {
 			child_pid = waitpid(-1, &status, 0);
 			if (child_pid > 0)
