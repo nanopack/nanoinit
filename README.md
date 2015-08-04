@@ -36,6 +36,5 @@ If no command is specified, it defaults to:
  - enable insecure ssh keys - not going to implement
  - skip startup files
 * output environment variables to json
-* run /etc/rc.local
 * run other startup files/scripts (my_init.py uses /etc/my_init.d/*)
 * stop runit services before shutting down

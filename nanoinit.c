@@ -62,7 +62,7 @@ import_envvars(int clear_existing_environment,
 	env_list    *list = NULL;
 	char        env_dir[] = "/etc/container_environment/";
 	// populate the env_list
-	if (stat(env_dir, &s) == 0 && S_ISDIR( s.st_mode )) {
+	if (stat(env_dir, &s) == 0 && S_ISDIR(s.st_mode)) {
 		DIR           *envdir  = opendir(env_dir);
 		env_list      *current = list;
 		struct dirent *entry;
@@ -253,8 +253,9 @@ pid_t
 run_init(char *args[])
 {
 	debug("starting service manager");
-	pid_t init_pid;
-	char *default_args[] = {"/opt/gonano/sbin/runsvdir", "-P", "/etc/service", 0};
+	pid_t	init_pid;
+	char	*default_args[] = {"/opt/gonano/sbin/runsvdir", "-P",
+		"/etc/service", 0};
 	if (args == NULL)
 		args = default_args;
 	// char *args[] = {"/bin/sleep", "10", 0};
@@ -271,6 +272,39 @@ run_init(char *args[])
 
 	debug("init pid: %d", init_pid);
 	return init_pid;
+}
+
+void
+run_rc_local()
+{
+	struct stat	s;
+	char		*rc_local[] = {"/etc/rc.local", 0};
+	pid_t		pid;
+	int         status;
+	if (stat(rc_local[0], &s) == 0 && 
+		(S_ISREG(s.st_mode) || S_ISLNK(s.st_mode)) && 
+		(s.st_mode | S_IXUSR)) {
+		if ((pid = fork()) == 0) {
+			import_envvars(1, 1);
+			if (execve(rc_local[0], rc_local, environ) == -1) {
+				error("Failed to exec the rc.local: %s", strerror(errno));
+				exit(1);
+			}
+		} else if (pid < 0) {
+			error("Failed to fork rc.local: %s", strerror(errno));
+		} else {
+			debug("rc.local pid: %d", pid);
+			do {
+				waitpid(pid, &status, 0);
+			} while (WIFEXITED(status) == 0 && signaled == 0);
+			if (WEXITSTATUS(status))
+				warn("rc.local exited with status: %d", WEXITSTATUS(status));
+			if (WIFSIGNALED(status))
+				warn("rc.local killed with signal: %d", WIFSIGNALED(status));
+		}
+	} else {
+		debug("Can not run /etc/rc.local");
+	}
 }
 
 int
@@ -315,12 +349,14 @@ main(int argc, char *argv[])
 	import_envvars(0, 0);
 	export_envvars(1);
 
+	run_rc_local();
+
 	if ((init_pid = run_init((arg_offset == argc) ? NULL : argv + arg_offset )) > 0) {
-		while (child_pid != init_pid && signaled == 0) {
+		do {
 			child_pid = waitpid(-1, &status, 0);
 			if (child_pid > 0)
 				debug("reaped process %d", child_pid);
-		}
+		} while (child_pid != init_pid && signaled == 0);
 	}
 
 	if (signaled)
