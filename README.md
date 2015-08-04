@@ -25,7 +25,7 @@ Writing the nanoinit in C helps reduce the memory footprint, allowing more docke
 ### TODO: list of things that my_init.py has that nanoinit doesn't
 * Custom options:
  - custom command for service management
- - enable insecure ssh keys
+ - enable insecure ssh keys - not going to implement
  - skip startup files
  - no killall on exit
  - quiet mode
