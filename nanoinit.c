@@ -303,7 +303,62 @@ run_rc_local()
 				warn("rc.local killed with signal: %d", WIFSIGNALED(status));
 		}
 	} else {
-		debug("Can not run /etc/rc.local");
+		debug("Can not run /etc/rc.local: %s", strerror(errno));
+	}
+}
+
+void
+run_nanoinit_d(char *action)
+{
+	struct stat		s;
+	struct dirent	**name_list;
+	pid_t			pid;
+	int				status;
+	int				n;
+	char    	    init_dir[] = "/etc/nanoinit.d/";
+	if (stat(init_dir, &s) == 0 && S_ISDIR(s.st_mode)) {
+		if ((n = scandir(init_dir, &name_list, 0, alphasort)) >= 0) {
+			for (int i = 0; i < n; i++) {
+				char filename[FILENAME_MAX];
+				sprintf(filename, "%s%s", init_dir, name_list[i]->d_name);
+				if (stat(filename, &s) == 0 &&
+					(S_ISREG(s.st_mode) || S_ISLNK(s.st_mode)) &&
+					(s.st_mode | S_IXUSR)) {
+					info("Running: \"%s %s\"", filename, action);
+					if ((pid = fork()) == 0) {
+						import_envvars(1,1);
+						char *cmd[] = {filename, action, 0};
+						if (execve(cmd[0], cmd, environ) == -1) {
+							error("Failed to exec \"%s %s\":", filename, action,
+								strerror(errno));
+							exit(1);
+						}
+					} else if (pid < 0) {
+						error("Failed to fork \"%s %s\": %s", filename, action,
+							strerror(errno));
+					} else {
+						debug("\"%s %s\" pid: %d", filename, action, pid);
+						do {
+							waitpid(pid, &status, 0);
+						} while (WIFEXITED(status) == 0 && signaled == 0);
+						if (WEXITSTATUS(status))
+							warn("\"%s %s\" exited with status: %d", filename,
+								action, WEXITSTATUS(status));
+						if (WIFSIGNALED(status))
+							warn("\"%s %s\" killed with signal: %d", filename,
+								action, WIFSIGNALED(status));
+					}
+				} else {
+					warn("Can't run: \"%s %s\"", filename, action);
+				}
+				free(name_list[i]);
+			}
+		} else {
+			error("/etc/nanoinit.d: %s", strerror(errno));
+		}
+		free(name_list);
+	} else {
+		debug("/etc/nanoinit.d: %s", strerror(errno));
 	}
 }
 
@@ -349,6 +404,7 @@ main(int argc, char *argv[])
 	import_envvars(0, 0);
 	export_envvars(1);
 
+	run_nanoinit_d("start");
 	run_rc_local();
 
 	if ((init_pid = run_init((arg_offset == argc) ? NULL : argv + arg_offset )) > 0) {
@@ -361,6 +417,7 @@ main(int argc, char *argv[])
 
 	if (signaled)
 		warn("Init system aborted.");
+	run_nanoinit_d("stop");
 	if (killall)
 		kill_all_processes(KILL_ALL_PROCESSES_TIMEOUT);
 	return ret;

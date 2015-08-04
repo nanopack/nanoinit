@@ -31,10 +31,13 @@ Writing the nanoinit in C helps reduce the memory footprint, allowing more docke
 If no command is specified, it defaults to:
     /opt/gonano/sbin/runsvdir -P /etc/service
 
+Before runnint the init command, nanoinit will run:
+* /etc/nanoinit.d/*
+* /etc/rc.local
+
 ### TODO: list of things that my_init.py has that nanoinit doesn't
 * Custom options:
  - enable insecure ssh keys - not going to implement
  - skip startup files
 * output environment variables to json
-* run other startup files/scripts (my_init.py uses /etc/my_init.d/*)
 * stop runit services before shutting down
