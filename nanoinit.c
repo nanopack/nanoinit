@@ -378,6 +378,7 @@ main(int argc, char *argv[])
 	int ret = 0;
 	int arg_offset;
 	int killall = 1;
+	int skip_startup_files = 0;
 
 	for (arg_offset = 1; arg_offset < argc; arg_offset++) {
 		if (strncmp("--",argv[arg_offset],2) != 0)
@@ -386,6 +387,8 @@ main(int argc, char *argv[])
 			log_level = LOG_LEVEL_WARN;
 		if (strncmp("--no-killall",argv[arg_offset],12) == 0)
 			killall = 0;
+		if (strncmp("--skip-startup-files",argv[arg_offset],20) == 0)
+			skip_startup_files = 1;
 	}
 
 	struct sigaction alarm;
@@ -404,8 +407,10 @@ main(int argc, char *argv[])
 	import_envvars(0, 0);
 	export_envvars(1);
 
-	run_nanoinit_d("start");
-	run_rc_local();
+	if (skip_startup_files == 0) {
+		run_nanoinit_d("start");
+		run_rc_local();
+	}
 
 	if ((init_pid = run_init((arg_offset == argc) ? NULL : argv + arg_offset )) > 0) {
 		do {
@@ -417,7 +422,8 @@ main(int argc, char *argv[])
 
 	if (signaled)
 		warn("Init system aborted.");
-	run_nanoinit_d("stop");
+	if (skip_startup_files == 0)
+		run_nanoinit_d("stop");
 	if (killall)
 		kill_all_processes(KILL_ALL_PROCESSES_TIMEOUT);
 	return ret;
