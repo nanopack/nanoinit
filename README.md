@@ -1,3 +1,6 @@
+[![nanoinit logo](http://nano-assets.gopagoda.io/readme-headers/nanoinit.png)](http://nanobox.io/open-source#nanoinit)
+ [![Build Status](https://travis-ci.org/nanopack/nanoinit.svg)](https://travis-ci.org/nanopack/nanoinit)
+
 # Nanoinit
 
 A small, proper, init process for docker containers.
@@ -26,3 +29,13 @@ Before running the init command, nanoinit will run:
 
 ## TODO
 - documentation
+
+### Contributing
+
+Contributions to the nanoinit project are welcome and encouraged. Nanoinit is a [Nanobox](https://nanobox.io) project and contributions should follow the [Nanobox Contribution Process & Guidelines](https://docs.nanobox.io/contributing/).
+
+### Licence
+
+Mozilla Public License Version 2.0
+
+[![open source](http://nano-assets.gopagoda.io/open-src/nanobox-open-src.png)](http://nanobox.io/open-source)
