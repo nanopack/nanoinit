@@ -5,3 +5,6 @@ all:	nanoinit
 
 nanoinit: nanoinit.c nanoinit.h
 	gcc -std=gnu11 -o nanoinit nanoinit.c
+
+build:
+	docker run --rm -v `pwd`:/usr/src/myapp -w /usr/src/myapp gcc:4.9 gcc -std=gnu11 -o nanoinit nanoinit.c
