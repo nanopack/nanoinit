@@ -5,3 +5,8 @@ all:	nanoinit
 
 nanoinit: nanoinit.c nanoinit.h
 	gcc -std=gnu11 -o nanoinit nanoinit.c
+
+deb: nanoinit
+	install -d deb/bin
+	install -s nanoinit deb/bin/nanoinit
+	fakeroot dpkg-deb --build deb nanoinit_0.0.1_amd64.deb
