@@ -1,0 +1,10 @@
+Package: nanoinit
+Version: 0.0.1
+Section: admin
+Priority: optional
+Architecture: amd64
+Installed-Size: 19
+Maintainer: Pagoda Box <braxton@pagodabox.com>
+Description: Nanoinit
+ A small, proper, init process for docker containers.
+Homepage: https://github.com/nanopack/nanoinit
