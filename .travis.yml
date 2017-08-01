@@ -1,4 +1,9 @@
 dist: trusty
 sudo: required
 language: c
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y fakeroot
+
 script: make deb

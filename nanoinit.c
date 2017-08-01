@@ -245,6 +245,13 @@ kill_all_processes(int timeout)
 		// try killing with stronger signal
 		kill(-1, SIGKILL);
 	}
+	// wait for any unwaited for children
+	while (done == 0) {
+		// wait for all children
+		ret = waitpid(-1, &status, 0);
+		if (ret == -1 && errno == ECHILD)
+			done = 1;
+	}
 	// cancel the alarm if it hasn't gone off yet
 	alarm(0);
 }
